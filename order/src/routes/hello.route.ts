@@ -1,44 +1,43 @@
-import axios from 'axios';
+import moment from 'moment';
 import express, { Request, Response } from 'express';
 import { codesePool, query } from '../configs/database.config';
+import { produceMessage } from '../producers';
 const router = express.Router();
 
 router.post('/api/order', async (req: Request, res: Response) => {
   let { id, orderName } = req.body;
-  const paymentName = orderName;
-  const deliveryName = orderName;
-  orderName = orderName + 'order';
-  const sqlOrder = `insert into \`order\` (id, orderName) values (?,?) `;
-
-  await query(codesePool, sqlOrder, [id, orderName]);
-
   try {
+    const messageKey = 'HUGO';
+    const messageValue = {
+      id,
+      name: orderName,
+    };
+    orderName = orderName + 'order';
+    const sqlOrder = `insert into \`order\` (id, orderName) values (?,?) `;
+
+    await query(codesePool, sqlOrder, [id, orderName]);
+    produceMessage(messageKey, JSON.stringify(messageValue));
+
+    res.send({
+      response_status: 1,
+      message: 'Order create successful',
+    });
+  } catch (err) {
     try {
-      await axios.post('localhost:3000/api/payment', {
-        id,
-        paymentName,
-      });
-    } catch (errPayment) {
-      throw Error('Payment error');
-    }
-    try {
-      await axios.post('localhost:3002/api/delivery', {
-        id,
-        deliveryName,
-      });
-    } catch (errDelivery) {
-      throw Error('Delivery error');
-    }
-  } catch (err: any) {
-    if (err.message == 'Payment error') {
       const sqlDeleteOrder = `delete from \`order\` where id='${id}'`;
       await query(codesePool, sqlDeleteOrder);
+    } catch (errDelete) {
+      const sqlLogError = `insert into LogError (log, createdAt) values (?,?)`;
+      await query(codesePool, sqlLogError, [
+        errDelete.toString(),
+        moment().format('YYYY-MM-DDTHH:mm:ss'),
+      ]);
     }
+    res.send({
+      response_status: 0,
+      message: 'Order create fail.',
+      error: err.message,
+    });
   }
-
-  res.send({
-    response_status: 1,
-    message: 'Order create successful',
-  });
 });
 export { router as helloRouter };
