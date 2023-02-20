@@ -9,6 +9,11 @@ const processor = async ({ topic, partition, message }) => {
     const { id } = data;
     const sqlDeleteOrder = `delete from \`order\` where id='${id}'`;
     await query(codesePool, sqlDeleteOrder);
+    const sqlLogError = `insert into LogError (log, createdAt) values (?,?)`;
+    await query(codesePool, sqlLogError, [
+      `Rollback Order #${id}`,
+      moment().format('YYYY-MM-DDTHH:mm:ss'),
+    ]);
   } catch (err) {
     const sqlLogError = `insert into LogError (log, createdAt) values (?,?)`;
     await query(codesePool, sqlLogError, [

@@ -6,6 +6,7 @@ import { produceMessage, produceRollbackPaymentMessage } from '../producers';
 
 const processor = async ({ topic, partition, message }) => {
   try {
+    console.log('-- Start delivery consume payment message --');
     const data = JSON.parse(message.value.toString());
     const { id, name } = data;
     const deliveryName = name + 'delivery';
