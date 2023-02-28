@@ -7,11 +7,12 @@ import { produceMessage, produceRollbackPaymentMessage } from '../producers';
 const processor = async ({ topic, partition, message }) => {
   try {
     console.log('-- Start delivery consume payment message --');
-    const data = JSON.parse(message.value.toString());
-    const { id, name } = data;
-    const deliveryName = name + 'delivery';
-    const sqlOrder = `insert into delivery (id, deliveryName) values (?,?) `;
-    await query(codesePool, sqlOrder, [id, deliveryName]);
+    throw Error('Test error Delivery');
+    // const data = JSON.parse(message.value.toString());
+    // const { id, name } = data;
+    // const deliveryName = name + 'delivery';
+    // const sqlOrder = `insert into delivery (id, deliveryName) values (?,?) `;
+    // await query(codesePool, sqlOrder, [id, deliveryName]);
   } catch (err) {
     const sqlLogError = `insert into LogError (log, createdAt) values (?,?)`;
     await query(codesePool, sqlLogError, [

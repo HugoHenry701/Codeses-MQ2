@@ -5,9 +5,7 @@ export const dbConfig = {
   limitConnection: 5,
 };
 
-export const dbName = {
-  marketDb: 'marketDb',
-};
+export const dbName = 'paymentDb';
 
 export const codesePool = mysql.createPool({
   connectionLimit: dbConfig.limitConnection,
@@ -15,7 +13,7 @@ export const codesePool = mysql.createPool({
   port: 3310,
   user: 'root',
   password: 'password',
-  database: 'paymentDb',
+  database: dbName,
 });
 
 export const query = async (

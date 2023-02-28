@@ -2,15 +2,17 @@ import express, { Request, Response } from 'express';
 import { codesePool, query } from '../configs/database.config';
 const router = express.Router();
 
-router.post('/api/payment', async (req: Request, res: Response) => {
-  let { id, paymentName } = req.body;
-  paymentName = paymentName + 'payment';
-  const sqlOrder = `insert into payment (id, paymentName) values (?,?) `;
-  await query(codesePool, sqlOrder, [id, paymentName]);
+router.get('/api/payment', async (req: Request, res: Response) => {
+  let { id } = req.body;
+  const sqlPayment = `select * from payment where id="${id}"`;
+  const data = await query(codesePool, sqlPayment);
 
   res.send({
     response_status: 1,
-    message: 'Payment create successful',
+    message: 'Payment get successful',
+    data: {
+      payment: data,
+    },
   });
 });
 export { router as helloRouter };

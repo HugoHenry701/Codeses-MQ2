@@ -2,14 +2,16 @@ import express, { Request, Response } from 'express';
 import { codesePool, query } from '../configs/database.config';
 const router = express.Router();
 
-router.post('/api/delivery', async (req: Request, res: Response) => {
-  let { id, deliveryName } = req.body;
-  deliveryName = deliveryName + 'delivery';
-  const sqlOrder = `insert into delivery (id, deliveryName) values (?,?) `;
-  await query(codesePool, sqlOrder, [id, deliveryName]);
+router.get('/api/delivery', async (req: Request, res: Response) => {
+  let { id } = req.body;
+  const sqlDelivery = `select * from delivery where id="${id}"`;
+  const data = await query(codesePool, sqlDelivery);
   res.send({
     response_status: 1,
-    message: 'Delivery create successful',
+    message: 'Delivery get successful',
+    data: {
+      delivery: data,
+    },
   });
 });
 export { router as helloRouter };

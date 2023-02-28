@@ -4,6 +4,27 @@ import { codesePool, query } from '../configs/database.config';
 import { produceMessage } from '../producers';
 const router = express.Router();
 
+router.get('/api/order', async (req: Request, res: Response) => {
+  let { id } = req.body;
+  try {
+    const sqlGetOrder = `select * from \`order\` where id="${id}"`;
+    const data = await query(codesePool, sqlGetOrder);
+    res.send({
+      response_status: 1,
+      message: 'Order get successful',
+      data: {
+        order: data,
+      },
+    });
+  } catch (error) {
+    const sqlLogError = `insert into LogError (log, createdAt) values (?,?)`;
+    await query(codesePool, sqlLogError, [
+      error.toString(),
+      moment().format('YYYY-MM-DDTHH:mm:ss'),
+    ]);
+  }
+});
+
 router.post('/api/order', async (req: Request, res: Response) => {
   let { id, orderName } = req.body;
   try {
@@ -17,7 +38,6 @@ router.post('/api/order', async (req: Request, res: Response) => {
 
     await query(codesePool, sqlOrder, [id, orderName]);
     produceMessage(messageKey, JSON.stringify(messageValue));
-
     res.send({
       response_status: 1,
       message: 'Order create successful',
